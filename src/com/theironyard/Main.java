@@ -39,7 +39,7 @@ public class Main {
                     }
                     m.put("messages", threads);
                     m.put("userName", userName);
-
+                    m.put("replyId", replyIdNum);
                     return new ModelAndView(m, "home.html");
                 }),
                 new MustacheTemplateEngine()
@@ -49,9 +49,13 @@ public class Main {
                 ((request, response) -> {
                     String userName = request.queryParams("loginName");
                     if (userName == null) {
-                        throw new Exception("Login name not found");
                     }
 
+                    User user = users.get(userName);
+                    if (user == null) {
+                        user = new User(userName, "");
+
+                    }
                     Session session = request.session();
                     session.attribute("userName", userName);
                     response.redirect("/");
@@ -64,6 +68,26 @@ public class Main {
                     Session session = request.session();
                     session.invalidate();
                     response.redirect("/");
+                    return "";
+                })
+        );
+        Spark.post(
+                "/create-message",
+                ((request, response) -> {
+                    Session session = request.session();
+                    String userName = session.attribute("userName");
+                    if (userName == null) {
+                        throw new Exception("Not logged in");
+                    }
+                    String text = request.queryParams("messageText");
+                    String replyId = request.queryParams("replyId");
+                    if (text == null || replyId == null) {
+                        throw new Exception("Did'nt get necessary parameters");
+                    }
+                    int replyIdNum = Integer.valueOf(replyId);
+                    Message m = new Message(messages.size(), replyIdNum, userName, text);
+                    messages.add(m);
+                    response.redirect(request.headers("Referer"));
                     return "";
                 })
         );
