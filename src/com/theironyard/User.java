@@ -8,8 +8,15 @@ import java.util.ArrayList;
 public class User {
     String name;
     String password;
+    int id;
 
-    public User(String password, String name) {
+    public User(String name, String password) {
+        this.name = name;
+        this.password = password;
+    }
+
+    public User(int id, String password, String name) {
+        this.id = id;
         this.password = password;
         this.name = name;
     }
